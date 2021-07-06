@@ -1,17 +1,18 @@
 #include "CO2Sensor.h"
 
-CO2Sensor co2Sensor(A0, 0.99, 100);
+//CO2Sensor co2Sensor(A0, 0.99, 100);
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println("=== Initialized ===");
-  co2Sensor.calibrate();
+  //co2Sensor.calibrate();
+  pinMode(A0, INPUT);
 }
 
 void loop() {
-  int val = co2Sensor.read();
+  int val = analogRead(A0);
   Serial.print("CO2 value: ");
   Serial.println(val);
 
-  delay(1000);
+  delay(500);
 }

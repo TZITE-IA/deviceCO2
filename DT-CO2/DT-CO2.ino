@@ -1,13 +1,13 @@
 #include "CO2Sensor.h"
 #include <ESP8266WiFi.h>              //Incluye la librería ESP8266WiFi
 
-const char* ssid = "Amoxtli";     //Indicamos el nombre de la red WiFi (SSID) a la que queremos conectarnos.
-const char* password = "1521I1524+"; //Indicamos la contraseña de de red WiFi
+const char* ssid = "pcpuma";     //Indicamos el nombre de la red WiFi (SSID) a la que queremos conectarnos.
+const char* password = ""; //Indicamos la contraseña de de red WiFi
 
 const char* host = "dtco2.herokuapp.com";  //Declaramos el servidor de conexión
 
 CO2Sensor co2Sensor(A0, 0.99, 100);
-String locate="Afuera";
+String locate="ambiente";  //ambiente, lateral, central
 int i = 1;
 int val = 0;
 void setup() {
@@ -21,21 +21,12 @@ void setup() {
 
 void loop() {
   WiFiClient client; //Inicializamos el cliente (client)
- /* 
-  if(i<=1){ 
-    locate="Adentro"; 
-  }else{ 
-    locate="Afuera"; 
-    i=0;
-  }
-  i++;*/
-  readSensor();
-  
   Serial.printf("\n[Conectando a %s ... ", host);  //Establecemos la conexión con el servidor
   if (client.connect(host, 80)){
     Serial.println("conectado]");
     Serial.println("[Enviando peticion]");         //Enviamos la petición de datos
-    String PostData = "{\"name\": \"sensor\",\"site\": \""+ locate +"\", \"series\": {\"value\": " + String(val) + ",\"name\":\"mock\"}}";
+    readSensor();
+    String PostData = "{\"name\": \"Sensor\",\"site\": \""+ locate +"\", \"series\": {\"value\": " + String(val) + ",\"name\":\"mock\"}}";
     Serial.println(PostData);
     client.println("PUT /update HTTP/1.1");
     client.println("Host: dtco2.herokuapp.com");
@@ -46,7 +37,6 @@ void loop() {
     client.println(PostData.length());
     client.println();
     client.println(PostData);
-
     Serial.println("[Respuesta:]");  //Leemos la respuesta del servidor
     while (client.connected()){
       if (client.available()){
@@ -71,7 +61,6 @@ void loop() {
 }
 
 void connect() {
-  Serial.printf("Connecting to %s ", ssid);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -84,10 +73,9 @@ void readSensor(){
   val = co2Sensor.read();
   if (val >= 500 || val <= 400) {
     co2Sensor.calibrate();
-    delay(100);
     int val = co2Sensor.read();
   }
-  if (val >= 750){
+  if (val >= 700){
     alarm();
   }
 }
